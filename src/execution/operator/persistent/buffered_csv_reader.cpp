@@ -31,6 +31,14 @@ BufferedCSVReader::BufferedCSVReader(FileSystem &fs_p, Allocator &allocator, Fil
 	Initialize(requested_types);
 }
 
+BufferedCSVReader::BufferedCSVReader(Allocator &allocator, unique_ptr<FileHandle> file_handle_p,
+                                     BufferedCSVReaderOptions options_p, const vector<LogicalType> &requested_types)
+    : BaseCSVReader(*FileSystem::CreateLocal(), allocator, nullptr, move(options_p), requested_types), buffer_size(0),
+      position(0), start(0) {
+	file_handle = make_unique<CSVFileHandle>(std::move(file_handle_p));
+	Initialize(requested_types);
+}
+
 BufferedCSVReader::BufferedCSVReader(ClientContext &context, BufferedCSVReaderOptions options_p,
                                      const vector<LogicalType> &requested_types)
     : BufferedCSVReader(FileSystem::GetFileSystem(context), Allocator::Get(context), FileSystem::GetFileOpener(context),
